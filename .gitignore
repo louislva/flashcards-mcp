@@ -2,3 +2,5 @@ node_modules/
 dist/
 flashcards.json
 .env.local
+*.json.bak
+*-adminsdk-*.json

@@ -17,24 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // Auth: accept static API key OR OAuth token
-  const apiKey = process.env.FLASHCARD_API_KEY;
+  // Auth: OAuth token only
   const auth = req.headers.authorization;
   const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
 
-  let authenticated = false;
+  const userId = token ? await validateAccessToken(token) : null;
 
-  if (token) {
-    // Check static API key first (backward compat)
-    if (apiKey && token === apiKey) {
-      authenticated = true;
-    } else {
-      // Check OAuth token in Redis
-      authenticated = await validateAccessToken(token);
-    }
-  }
-
-  if (!authenticated) {
+  if (!userId) {
     const host = `https://${req.headers.host}`;
     res.setHeader(
       "WWW-Authenticate",
@@ -45,8 +34,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Create server + tools per request (stateless mode)
-  const server = new McpServer({ name: "flashcard-mcp", version: "0.3.0" });
-  registerTools(server, new KVStore());
+  const server = new McpServer({ name: "flashcard-mcp", version: "0.4.0" });
+  registerTools(server, new KVStore(userId));
 
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
 

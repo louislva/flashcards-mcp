@@ -1,20 +1,20 @@
 import { Redis } from "@upstash/redis";
 import type { Store, StoreBackend } from "./store.js";
 
-const STORE_KEY = "flashcards";
-
 export class KVStore implements StoreBackend {
   private redis: Redis;
+  private key: string;
 
-  constructor() {
+  constructor(userId: string) {
     this.redis = new Redis({
       url: process.env.KV_REST_API_URL!,
       token: process.env.KV_REST_API_TOKEN!,
     });
+    this.key = `user:${userId}:flashcards`;
   }
 
   async load(): Promise<Store> {
-    const data = await this.redis.get<Store>(STORE_KEY);
+    const data = await this.redis.get<Store>(this.key);
     if (!data) return { projects: [], flashcards: [] };
     if (!data.projects) data.projects = [];
     for (const p of data.projects) {
@@ -24,6 +24,6 @@ export class KVStore implements StoreBackend {
   }
 
   async save(store: Store): Promise<void> {
-    await this.redis.set(STORE_KEY, store);
+    await this.redis.set(this.key, store);
   }
 }

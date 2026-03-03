@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Issue access token
   const accessToken = generateId();
-  await saveAccessToken(accessToken);
+  await saveAccessToken(accessToken, authCode.user_id);
 
   res.json({
     access_token: accessToken,
