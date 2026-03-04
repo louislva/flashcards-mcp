@@ -6,6 +6,10 @@ Organize cards into projects, tag them by topic, and let the scheduling algorith
 
 100% vibecoded.
 
+## Blog post
+
+Read about how I use this MCP to learn math: [Flashcards MCP](https://louisarge.com/blog/flashcards-mcp)
+
 ## Installation
 
 The server URL is:
