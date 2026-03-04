@@ -21,6 +21,11 @@ function loginPage(params: Record<string, string>, error?: string): string {
     #google-btn:hover { background: #f7f7f7; }
     #google-btn svg { width: 20px; height: 20px; }
     #status { margin-top: 16px; color: #666; font-size: 0.9em; }
+    .disclaimer {
+      margin-top: 24px; padding: 14px; background: #fdf6e3; border: 1px solid #e0d3b8;
+      border-radius: 6px; font-size: 0.8em; color: #665; line-height: 1.5;
+    }
+    .disclaimer strong { color: #554; }
   </style>
 </head>
 <body>
@@ -32,6 +37,10 @@ function loginPage(params: Record<string, string>, error?: string): string {
     Sign in with Google
   </button>
   <div id="status"></div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This service is provided "as is" without warranties of any kind, express or implied. We do not guarantee the privacy, security, or availability of your data. Use this service at your own risk. The maintainers accept no responsibility for data loss, data leaks, or any damages arising from the use of this service.
+  </div>
 
   <form id="auth-form" method="POST" action="/api/authorize" style="display:none">
     <input type="hidden" name="firebase_id_token" id="firebase_id_token">
