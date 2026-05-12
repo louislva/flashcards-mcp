@@ -74,6 +74,7 @@
     .project.disabled { opacity: 0.5; cursor: default; }
     .project .name { font-weight: 600; }
     .project .desc { font-size: 0.85em; color: #666; margin-top: 2px; }
+    .project .meta { font-size: 0.72em; color: #aaa; margin-top: 4px; }
     .project .badge {
       background: #06c; color: #fff; border-radius: 999px;
       padding: 3px 10px; font-size: 0.8em; font-weight: 600;
@@ -293,6 +294,7 @@
               <div>
                 <div class="name">${escapeHtml(p.name)}</div>
                 <div class="desc">${escapeHtml(p.description || "")}</div>
+                <div class="meta">${p.total} card${p.total === 1 ? "" : "s"} total</div>
               </div>
               <div class="badge ${dueClass}">${p.due} due</div>
             </div>`;
