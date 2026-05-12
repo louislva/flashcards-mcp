@@ -147,6 +147,19 @@
     }
     .loading { color: #888; font-size: 0.9em; }
 
+    .toast {
+      position: fixed; top: 64px; left: 50%; transform: translate(-50%, -8px);
+      background: #1a1a1a; color: #fff; padding: 8px 14px;
+      border-radius: 999px; font-size: 0.85em; font-weight: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 10; white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .toast.show {
+      opacity: 1; transform: translate(-50%, 0);
+    }
+
     @media (min-width: 600px) {
       .quality button { padding: 14px 8px; font-size: 0.95em; }
       .card { min-height: 260px; font-size: 1.2em; }
@@ -164,6 +177,7 @@
   <main id="main">
     <div class="loading">Loading…</div>
   </main>
+  <div id="toast" class="toast"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -348,10 +362,11 @@
       const card = state.queue[state.index];
       if (!card) return;
       try {
-        await authFetch("/api/practice", {
+        const result = await authFetch("/api/practice", {
           method: "POST",
           body: JSON.stringify({ id: card.id, quality }),
         });
+        showToast("Next review: " + formatDelay(result.next_review));
         state.index++;
         state.revealed = false;
         render();
@@ -359,6 +374,30 @@
         state.error = e.message;
         render();
       }
+    }
+
+    function formatDelay(iso) {
+      const diffMs = new Date(iso).getTime() - Date.now();
+      if (diffMs <= 0) return "now";
+      const min = Math.round(diffMs / 60000);
+      if (min < 60) return "in " + min + " min";
+      const hr = Math.round(min / 60);
+      if (hr < 48) return "in " + hr + " hr";
+      const days = Math.round(hr / 24);
+      if (days < 60) return "in " + days + " day" + (days === 1 ? "" : "s");
+      const months = Math.round(days / 30);
+      if (months < 24) return "in " + months + " month" + (months === 1 ? "" : "s");
+      const years = Math.round(days / 365);
+      return "in " + years + " year" + (years === 1 ? "" : "s");
+    }
+
+    let toastTimer = null;
+    function showToast(text) {
+      const el = document.getElementById("toast");
+      el.textContent = text;
+      el.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove("show"), 1600);
     }
 
     function goHome() {
