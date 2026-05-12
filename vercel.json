@@ -22,6 +22,10 @@
     {
       "source": "/.well-known/oauth-authorization-server",
       "destination": "/api/oauth-metadata"
+    },
+    {
+      "source": "/practice",
+      "destination": "/practice.html"
     }
   ]
 }

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#fafafa">
+  <title>Flashcard Practice</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #fafafa; color: #1a1a1a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; border-bottom: 1px solid #eee;
+      background: #fff;
+    }
+    header .title { font-weight: 600; font-size: 0.95em; }
+    header .right { font-size: 0.85em; color: #666; display: flex; gap: 10px; align-items: center; }
+    header button.link {
+      background: none; border: none; color: #06c; cursor: pointer;
+      font-size: 0.85em; padding: 4px;
+    }
+    main {
+      flex: 1; padding: 20px 16px;
+      max-width: 700px; margin: 0 auto; width: 100%;
+    }
+    h1 { font-size: 1.4em; margin: 0 0 16px; }
+    h2 { font-size: 1.1em; margin: 0 0 12px; color: #333; }
+    p.dim { color: #666; font-size: 0.95em; }
+
+    /* Sign in */
+    .signin-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 48px 0;
+    }
+    button.google {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 12px 20px; font-size: 1em;
+      background: #fff; color: #333; border: 1px solid #ccc; border-radius: 6px;
+      cursor: pointer; font-family: inherit;
+    }
+    button.google:hover { background: #f5f5f5; }
+    button.google svg { width: 20px; height: 20px; }
+
+    /* Project list */
+    .projects { display: flex; flex-direction: column; gap: 10px; }
+    .project {
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 8px;
+      padding: 14px 16px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: border-color 0.15s, transform 0.05s;
+    }
+    .project:hover { border-color: #bbb; }
+    .project:active { transform: scale(0.99); }
+    .project.disabled { opacity: 0.5; cursor: default; }
+    .project .name { font-weight: 600; }
+    .project .desc { font-size: 0.85em; color: #666; margin-top: 2px; }
+    .project .badge {
+      background: #06c; color: #fff; border-radius: 999px;
+      padding: 3px 10px; font-size: 0.8em; font-weight: 600;
+      white-space: nowrap;
+    }
+    .project .badge.zero { background: #ddd; color: #888; }
+
+    /* Card */
+    .card-wrap {
+      display: flex; flex-direction: column;
+      gap: 16px;
+    }
+    .progress {
+      font-size: 0.85em; color: #666; text-align: center;
+    }
+    .card {
+      background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+      padding: 24px 20px;
+      min-height: 200px;
+      display: flex; flex-direction: column; justify-content: center;
+      white-space: pre-wrap; word-wrap: break-word;
+      font-size: 1.15em; line-height: 1.5;
+    }
+    .card .side-label {
+      font-size: 0.7em; color: #999; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 10px; font-weight: 600;
+    }
+    .card .divider {
+      border: 0; border-top: 1px dashed #ddd;
+      margin: 18px 0;
+    }
+    .card .tags {
+      margin-top: 14px; font-size: 0.75em; color: #888;
+    }
+    .reveal-btn {
+      padding: 14px;
+      background: #1a1a1a; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 1em; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .reveal-btn:active { background: #000; }
+
+    .quality {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .quality button {
+      padding: 12px 6px;
+      border: 1px solid #ddd; border-radius: 8px;
+      background: #fff; cursor: pointer; font-family: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 0.85em;
+    }
+    .quality button:active { transform: scale(0.97); }
+    .quality button .q-num { font-size: 1.1em; font-weight: 700; }
+    .quality button .q-label { color: #666; font-size: 0.78em; }
+    .quality button[data-q="1"] { border-color: #e8a8a8; }
+    .quality button[data-q="1"]:hover { background: #fdecec; }
+    .quality button[data-q="2"] { border-color: #e8c8a8; }
+    .quality button[data-q="2"]:hover { background: #fdf3ec; }
+    .quality button[data-q="3"] { border-color: #b8d8b8; }
+    .quality button[data-q="3"]:hover { background: #effbef; }
+    .quality button[data-q="4"] { border-color: #a8c8e8; }
+    .quality button[data-q="4"]:hover { background: #ecf3fd; }
+
+    .hint {
+      text-align: center; color: #999; font-size: 0.75em;
+      margin-top: -4px;
+    }
+    .done {
+      text-align: center; padding: 40px 0;
+    }
+    .done .emoji { font-size: 3em; }
+    .err {
+      background: #fff0f0; border: 1px solid #f0c0c0; color: #a00;
+      padding: 10px 14px; border-radius: 6px; font-size: 0.9em;
+    }
+    .back-link {
+      background: none; border: none; color: #06c;
+      cursor: pointer; padding: 0; font-size: 0.9em;
+      font-family: inherit;
+    }
+    .loading { color: #888; font-size: 0.9em; }
+
+    @media (min-width: 600px) {
+      .quality button { padding: 14px 8px; font-size: 0.95em; }
+      .card { min-height: 260px; font-size: 1.2em; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Flashcard Practice</div>
+    <div class="right">
+      <span id="user-email"></span>
+      <button class="link" id="signout-btn" style="display:none" onclick="signOut()">Sign out</button>
+    </div>
+  </header>
+  <main id="main">
+    <div class="loading">Loading…</div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyBZ9UpCoGko3BvtYiufUApIMpN2XZC4Xug",
+      authDomain: "flashcards-mcp.firebaseapp.com",
+      projectId: "flashcards-mcp",
+      storageBucket: "flashcards-mcp.firebasestorage.app",
+      messagingSenderId: "683252912714",
+      appId: "1:683252912714:web:382fadfebcab46676f8cb3"
+    });
+
+    const main = document.getElementById("main");
+    const userEmailEl = document.getElementById("user-email");
+    const signoutBtn = document.getElementById("signout-btn");
+
+    let state = {
+      view: "loading",
+      projects: [],
+      project: null,
+      queue: [],
+      index: 0,
+      revealed: false,
+      error: null,
+    };
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    async function authFetch(url, opts = {}) {
+      const user = firebase.auth().currentUser;
+      if (!user) throw new Error("Not signed in");
+      const token = await user.getIdToken();
+      const headers = Object.assign({}, opts.headers || {}, {
+        Authorization: "Bearer " + token,
+      });
+      if (opts.body && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+      }
+      const res = await fetch(url, Object.assign({}, opts, { headers }));
+      if (!res.ok) {
+        let msg = "Request failed (" + res.status + ")";
+        try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      return res.json();
+    }
+
+    function render() {
+      if (state.error) {
+        main.innerHTML = `<div class="err">${escapeHtml(state.error)}</div>`;
+        return;
+      }
+      if (state.view === "loading") {
+        main.innerHTML = `<div class="loading">Loading…</div>`;
+        return;
+      }
+      if (state.view === "signin") {
+        main.innerHTML = `
+          <div class="signin-wrap">
+            <h1>Practice your flashcards</h1>
+            <p class="dim" style="text-align:center;max-width:380px">
+              Sign in with the same Google account you use with the Flashcard MCP.
+            </p>
+            <button class="google" onclick="signIn()">
+              <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.9 7.35 2.56 10.53l7.97-5.94z"/><path fill="#FBBC05" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.94C6.51 42.62 14.62 48 24 48z"/></svg>
+              Sign in with Google
+            </button>
+          </div>`;
+        return;
+      }
+      if (state.view === "projects") {
+        if (state.projects.length === 0) {
+          main.innerHTML = `
+            <h1>No projects yet</h1>
+            <p class="dim">Create a project and add flashcards from Claude (or any MCP client) first.</p>`;
+          return;
+        }
+        const items = state.projects.map((p) => {
+          const dueClass = p.due === 0 ? "zero" : "";
+          const disabled = p.due === 0 ? "disabled" : "";
+          const click = p.due === 0 ? "" : `onclick="startProject('${escapeHtml(p.name)}')"`;
+          return `
+            <div class="project ${disabled}" ${click}>
+              <div>
+                <div class="name">${escapeHtml(p.name)}</div>
+                <div class="desc">${escapeHtml(p.description || "")}</div>
+              </div>
+              <div class="badge ${dueClass}">${p.due} due</div>
+            </div>`;
+        }).join("");
+        main.innerHTML = `
+          <h1>Pick a project</h1>
+          <div class="projects">${items}</div>`;
+        return;
+      }
+      if (state.view === "practice") {
+        const card = state.queue[state.index];
+        if (!card) {
+          main.innerHTML = `
+            <div class="done">
+              <div class="emoji">✨</div>
+              <h2>All caught up!</h2>
+              <p class="dim">No more cards due in <strong>${escapeHtml(state.project)}</strong>.</p>
+              <button class="back-link" onclick="goHome()">← Back to projects</button>
+            </div>`;
+          return;
+        }
+        const tags = card.tags && card.tags.length ? `<div class="tags">${card.tags.map((t) => "#" + escapeHtml(t)).join(" ")}</div>` : "";
+        const body = state.revealed
+          ? `
+            <div class="side-label">Front</div>
+            <div>${escapeHtml(card.front)}</div>
+            <hr class="divider">
+            <div class="side-label">Back</div>
+            <div>${escapeHtml(card.back)}</div>
+            ${tags}`
+          : `
+            <div class="side-label">Front</div>
+            <div>${escapeHtml(card.front)}</div>
+            ${tags}`;
+        const action = state.revealed
+          ? `
+            <div class="quality">
+              <button data-q="1" onclick="grade(1)"><span class="q-num">1</span><span class="q-label">Forgot</span></button>
+              <button data-q="2" onclick="grade(2)"><span class="q-num">2</span><span class="q-label">Hard</span></button>
+              <button data-q="3" onclick="grade(3)"><span class="q-num">3</span><span class="q-label">Good</span></button>
+              <button data-q="4" onclick="grade(4)"><span class="q-num">4</span><span class="q-label">Easy</span></button>
+            </div>
+            <div class="hint">Keys: 1 · 2 · 3 · 4</div>`
+          : `
+            <button class="reveal-btn" onclick="reveal()">Show answer</button>
+            <div class="hint">Press space</div>`;
+        main.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <button class="back-link" onclick="goHome()">← ${escapeHtml(state.project)}</button>
+            <div class="progress">${state.index + 1} / ${state.queue.length}</div>
+          </div>
+          <div class="card-wrap">
+            <div class="card">${body}</div>
+            ${action}
+          </div>`;
+        return;
+      }
+    }
+
+    async function loadProjects() {
+      state.view = "loading"; state.error = null; render();
+      try {
+        const { projects } = await authFetch("/api/practice");
+        state.projects = projects.sort((a, b) => b.due - a.due);
+        state.view = "projects";
+      } catch (e) {
+        state.error = e.message;
+      }
+      render();
+    }
+
+    async function startProject(name) {
+      state.view = "loading"; state.error = null; state.project = name; render();
+      try {
+        const { cards } = await authFetch("/api/practice?project=" + encodeURIComponent(name) + "&limit=50");
+        state.queue = cards;
+        state.index = 0;
+        state.revealed = false;
+        state.view = "practice";
+      } catch (e) {
+        state.error = e.message;
+      }
+      render();
+    }
+
+    function reveal() {
+      state.revealed = true;
+      render();
+    }
+
+    async function grade(quality) {
+      const card = state.queue[state.index];
+      if (!card) return;
+      try {
+        await authFetch("/api/practice", {
+          method: "POST",
+          body: JSON.stringify({ id: card.id, quality }),
+        });
+        state.index++;
+        state.revealed = false;
+        render();
+      } catch (e) {
+        state.error = e.message;
+        render();
+      }
+    }
+
+    function goHome() {
+      state.project = null;
+      state.queue = [];
+      state.index = 0;
+      state.revealed = false;
+      loadProjects();
+    }
+
+    async function signIn() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await firebase.auth().signInWithPopup(provider);
+      } catch (e) {
+        state.error = "Sign-in failed: " + e.message;
+        render();
+      }
+    }
+
+    async function signOut() {
+      await firebase.auth().signOut();
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (state.view !== "practice") return;
+      if (!state.revealed && (e.key === " " || e.key === "Enter")) {
+        e.preventDefault();
+        reveal();
+        return;
+      }
+      if (state.revealed && ["1", "2", "3", "4"].includes(e.key)) {
+        e.preventDefault();
+        grade(parseInt(e.key, 10));
+      }
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        userEmailEl.textContent = user.email || "";
+        signoutBtn.style.display = "";
+        loadProjects();
+      } else {
+        userEmailEl.textContent = "";
+        signoutBtn.style.display = "none";
+        state.view = "signin";
+        state.error = null;
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
