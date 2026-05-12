@@ -117,6 +117,14 @@
     }
     .reveal-btn:active { background: #000; }
 
+    .skip-btn {
+      align-self: center;
+      background: none; border: none;
+      color: #888; cursor: pointer; font-family: inherit;
+      font-size: 0.85em; padding: 6px 10px;
+    }
+    .skip-btn:hover { color: #333; }
+
     .quality {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
     }
@@ -326,10 +334,12 @@
               <button data-q="3" onclick="grade(3)"><span class="q-num">3</span><span class="q-label">Good</span></button>
               <button data-q="4" onclick="grade(4)"><span class="q-num">4</span><span class="q-label">Easy</span></button>
             </div>
-            <div class="hint">Keys: 1 · 2 · 3 · 4</div>`
+            <div class="hint">Keys: 1 · 2 · 3 · 4 · s to skip</div>
+            <button class="skip-btn" onclick="skip()">Skip</button>`
           : `
             <button class="reveal-btn" onclick="reveal()">Show answer</button>
-            <div class="hint">Press space</div>`;
+            <div class="hint">Space to reveal · s to skip</div>
+            <button class="skip-btn" onclick="skip()">Skip</button>`;
         main.innerHTML = `
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <button class="back-link" onclick="goHome()">← ${escapeHtml(state.project)}</button>
@@ -371,6 +381,13 @@
 
     function reveal() {
       state.revealed = true;
+      render();
+    }
+
+    function skip() {
+      if (state.view !== "practice") return;
+      state.index++;
+      state.revealed = false;
       render();
     }
 
@@ -440,6 +457,11 @@
 
     document.addEventListener("keydown", (e) => {
       if (state.view !== "practice") return;
+      if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        skip();
+        return;
+      }
       if (!state.revealed && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
         reveal();
