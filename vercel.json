@@ -7,13 +7,6 @@
       "maxDuration": 30
     }
   },
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "https://github.com/louislva/flashcards-mcp?tab=readme-ov-file#flashcard-mcp",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/.well-known/oauth-protected-resource",
@@ -25,7 +18,7 @@
     },
     {
       "source": "/practice",
-      "destination": "/practice.html"
+      "destination": "/index.html"
     }
   ]
 }
