@@ -6,9 +6,14 @@ export interface Flashcard {
   tags: string[];
   created_at: string;
   next_review: string;
-  interval_days: number;
-  ease_factor: number;
-  repetitions: number;
+  scheduled_days: number;
+  stability: number;
+  difficulty: number;
+  fsrs_state: "New" | "Learning" | "Review" | "Relearning";
+  review_count: number;
+  lapse_count: number;
+  learning_steps: number;
+  last_review?: string;
 }
 
 export interface Project {

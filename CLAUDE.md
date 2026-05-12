@@ -34,7 +34,7 @@ Stores the shape: `{ projects: Project[], flashcards: Flashcard[] }`.
 
 ### Spaced repetition
 
-`src/sr.ts` implements SM-2. Quality 1-2 resets progress; quality 3-4 advances intervals (1d → 3d → ease_factor multiplier). Ease factor floors at 1.3.
+`src/sr.ts` uses `ts-fsrs` to schedule cards with FSRS. Review quality maps to Anki-style ratings: 1 = Again, 2 = Hard, 3 = Good, 4 = Easy. Cards store FSRS memory state (`stability`, `difficulty`, `fsrs_state`, review/lapse counts, learning step, and `last_review`) instead of SM-2 ease/repetition fields.
 
 ### Authentication: Firebase + OAuth 2.1
 

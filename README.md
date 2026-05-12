@@ -1,6 +1,6 @@
 # flashcard-mcp
 
-An MCP server that gives Claude (or any MCP client) the ability to create, review, and manage flashcards with spaced repetition (SM-2 algorithm).
+An MCP server that gives Claude (or any MCP client) the ability to create, review, and manage flashcards with spaced repetition (FSRS algorithm).
 
 Organize cards into projects, tag them by topic, and let the scheduling algorithm figure out when you need to see each card again.
 
@@ -37,6 +37,8 @@ It works out of the box — just add it as a remote MCP server in your client an
 ## Self-hosting
 
 The `api/mcp.ts` endpoint runs as a Vercel serverless function, backed by Upstash Redis.
+
+Requires Node.js 20 or newer.
 
 Connect an Upstash Redis database via Vercel's Storage integration — it'll set up `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically.
 

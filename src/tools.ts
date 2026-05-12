@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Flashcard, StoreBackend } from "./store.js";
-import { nextReview } from "./sr.js";
+import { formatDueStatus, formatNextReview, initialSchedule, nextReview } from "./sr.js";
 
 export function registerTools(server: McpServer, store: StoreBackend) {
   // --- Project tools ---
@@ -143,10 +143,7 @@ export function registerTools(server: McpServer, store: StoreBackend) {
         back,
         tags: tags ?? [],
         created_at: new Date().toISOString(),
-        next_review: new Date().toISOString(),
-        interval_days: 0,
-        ease_factor: 2.5,
-        repetitions: 0,
+        ...initialSchedule(),
       };
       data.flashcards.push(card);
       await store.save(data);
@@ -250,7 +247,7 @@ export function registerTools(server: McpServer, store: StoreBackend) {
         content: [
           {
             type: "text" as const,
-            text: `Reviewed! Next review in ${card.interval_days} day(s) (${card.next_review.split("T")[0]}).`,
+            text: `Reviewed! Next review ${formatNextReview(card.next_review)}.`,
           },
         ],
       };
@@ -312,7 +309,7 @@ export function registerTools(server: McpServer, store: StoreBackend) {
       const now = new Date().toISOString();
       const text = cards
         .map((c, i) => {
-          const due = c.next_review <= now ? "DUE" : `next: ${c.next_review.split("T")[0]}`;
+          const due = formatDueStatus(c.next_review, new Date(now));
           return `${start + i + 1}. [${c.id}] (${c.project})\n   Front: ${c.front}\n   Tags: ${c.tags.join(", ") || "none"}\n   Status: ${due}`;
         })
         .join("\n\n");
