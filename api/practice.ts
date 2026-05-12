@@ -71,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await store.save(data);
     const card = data.flashcards[idx];
     res.status(200).json({
-      interval_days: card.interval_days,
+      scheduled_days: card.scheduled_days,
       next_review: card.next_review,
     });
     return;
